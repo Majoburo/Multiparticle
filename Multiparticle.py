@@ -25,8 +25,8 @@ class MassPoint:
     self.vy_=vy
     self.vz_=vz
     self.rad=mass**(1./3.)
-    self.color = (255,255,255)
-    self.colorwarp = (0,0,0)
+    self.color = np.array([255,255,255])
+    self.colorwarp = np.array([0,0,0])
   def update(self, ax, ay, az, dt):
     self.vx=self.vx_+ax*dt
     self.vy=self.vy_+ay*dt
@@ -45,11 +45,11 @@ class MassPoint:
         self.y_ -= worldHeight
     self.rad=self.mass_**(1./3.)*(self.z_/100+1)**(2* np.sign(self.z_))
     if self.vz_>0:
-        self.colorwarp = self.vz_
+        self.colorwarp = self.color+(np.array([0,0,255])-self.color)*self.vz_/1
     else:
-        self.colorwarp = (0,10,10)*z
+        self.colorwarp = self.color+(np.array([255,0,0])-self.color)*np.abs(self.vz_)/1
   def render(self):
-    pygame.draw.circle(screen,self.color,(int(self.x_),int(self.y_)),int(self.rad),0)
+    pygame.draw.circle(screen,self.colorwarp,(int(self.x_),int(self.y_)),int(self.rad),0)
 
 massPoints = []
 for i in range(20):
