@@ -6,7 +6,6 @@ import numpy as np
 
 worldWidth = 900
 worldHeight = 900
-worldDepth = 3
 
 pygame.init()
 screen = pygame.display.set_mode((worldWidth,worldHeight))
@@ -15,6 +14,7 @@ clock=pygame.time.Clock()
 maxfps=60
 font = pygame.font.Font(None,30)
 dt=0.1
+c = 1
 class MassPoint:
   def __init__(self, mass, x, y, z, vx, vy, vz):
     self.mass_=mass
@@ -35,25 +35,23 @@ class MassPoint:
     self.y_=self.y_+self.vy_*dt+0.5*ay*dt*dt
     self.z_=self.z_+self.vz_*dt+0.5*az*dt*dt
     # we're on a torus
-    if (self.x_<0):
-        self.x_ += worldWidth
-    if (self.x_>worldWidth):
-        self.x_ -= worldWidth
-    if (self.y_<0) :
-        self.y_ += worldHeight
-    if (self.y_>worldHeight) :
-        self.y_ -= worldHeight
-    self.rad=self.mass_**(1./3.)*(self.z_/100+1)**(2* np.sign(self.z_))
+    if (self.x_<0):          self.x_ += worldWidth
+    if (self.x_>worldWidth): self.x_ -= worldWidth
+    if (self.y_<0) :         self.y_ += worldHeight
+    if (self.y_>worldHeight):self.y_ -= worldHeight
+    self.rad=min(self.mass_**(1./3.)*(self.z_/100+1)**(2* np.sign(self.z_)),worldWidth)
     if self.vz_>0:
-        self.colorwarp = self.color+(np.array([0,0,255])-self.color)*self.vz_/1
+        self.colorwarp = self.color+(np.array([255,0,0])-self.color)*self.vz_/c
     else:
-        self.colorwarp = self.color+(np.array([255,0,0])-self.color)*np.abs(self.vz_)/1
+        self.colorwarp = self.color+(np.array([0,0,255])-self.color)*np.abs(self.vz_)/c
   def render(self):
     pygame.draw.circle(screen,self.colorwarp,(int(self.x_),int(self.y_)),int(self.rad),0)
 
 massPoints = []
-for i in range(20):
-  massPoints.append(MassPoint(100, random.uniform(worldWidth*0.3, worldWidth*0.7), random.uniform(worldHeight*0.3, worldHeight*0.7), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.1, 0.1)))
+for i in range(30):
+  massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, 0, 0, 0))
+massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3, 0.3)))
+massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3, 0.3)))
 
 t=0
 while not done:
@@ -67,7 +65,7 @@ while not done:
       if (massPoint2 != massPoint1):
         r = math.sqrt((massPoint2.x_-massPoint1.x_)**2+(massPoint2.y_-massPoint1.y_)**2+(massPoint2.z_-massPoint1.z_)**2)
         if r>0:
-          g = 10.*massPoint2.mass_/(r**3+10)
+          g = 50.*massPoint2.mass_/(r**3+10)
           ax = ax + g * (massPoint2.x_-massPoint1.x_)
           ay = ay + g * (massPoint2.y_-massPoint1.y_)
           az = az + g * (massPoint2.z_-massPoint1.z_)
