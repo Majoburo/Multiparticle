@@ -13,8 +13,11 @@ done = False
 clock=pygame.time.Clock()
 maxfps=60
 font = pygame.font.Font(None,30)
-dt=0.1
+dt=0.05
+dt_per_frame = 20
 c = 1
+G = 40
+
 class MassPoint:
   def __init__(self, mass, x, y, z, vx, vy, vz):
     self.mass_=mass
@@ -49,9 +52,7 @@ class MassPoint:
 
 massPoints = []
 for i in range(30):
-  massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, 0, 0, 0))
-massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3, 0.3)))
-massPoints.append(MassPoint(np.random.normal(100,30), random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3, 0.3)))
+    massPoints.append(MassPoint(100, random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3,0.3)))
 
 t=0
 while not done:
@@ -65,14 +66,15 @@ while not done:
       if (massPoint2 != massPoint1):
         r = math.sqrt((massPoint2.x_-massPoint1.x_)**2+(massPoint2.y_-massPoint1.y_)**2+(massPoint2.z_-massPoint1.z_)**2)
         if r>0:
-          g = 50.*massPoint2.mass_/(r**3+10)
+          g = G*massPoint2.mass_*massPoint1.mass_/(r**3+10)
           ax = ax + g * (massPoint2.x_-massPoint1.x_)
           ay = ay + g * (massPoint2.y_-massPoint1.y_)
           az = az + g * (massPoint2.z_-massPoint1.z_)
     massPoint1.update(ax, ay, az,dt)
-  for massPoint in massPoints:
-    massPoint.render()
-  text = font.render("t = %6.4f"%t, True, (255,255,255))
-  screen.blit(text,(20,20))
-  pygame.display.flip()
-  clock.tick(maxfps)
+  if (t%dt_per_frame==0):
+      for massPoint in massPoints:
+        massPoint.render()
+      text = font.render("t = %6.4f"%(t*dt), True, (255,255,255))
+      screen.blit(text,(20,20))
+      pygame.display.flip()
+      clock.tick(maxfps)
