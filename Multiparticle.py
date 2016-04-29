@@ -9,7 +9,6 @@ worldHeight = 900
 
 pygame.init()
 screen = pygame.display.set_mode((worldWidth,worldHeight))
-done = False
 clock=pygame.time.Clock()
 maxfps=60
 font = pygame.font.Font(None,30)
@@ -55,7 +54,7 @@ for i in range(30):
     massPoints.append(MassPoint(100, random.uniform(worldWidth*0.2, worldWidth*0.8), random.uniform(worldHeight*0.2, worldHeight*0.8), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.3,0.3)))
 
 t=0
-while not done:
+while True:
   screen.fill((0,0,0))
   t=t+1
   for massPoint1 in massPoints:
