@@ -1,7 +1,6 @@
 import random
 import math
 import pygame
-import pdb
 import numpy as np
 
 worldWidth = 900
