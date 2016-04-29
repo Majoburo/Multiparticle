@@ -63,12 +63,12 @@ while True:
     for massPoint2 in massPoints:
       if (massPoint2 != massPoint1):
         r = math.sqrt((massPoint2.x_-massPoint1.x_)**2+(massPoint2.y_-massPoint1.y_)**2+(massPoint2.z_-massPoint1.z_)**2)
-        if r>0:
-          g = G*massPoint2.mass_*massPoint1.mass_/(r**3+10)
-          ax = ax + g * (massPoint2.x_-massPoint1.x_)
-          ay = ay + g * (massPoint2.y_-massPoint1.y_)
-          az = az + g * (massPoint2.z_-massPoint1.z_)
+      g = G*massPoint2.mass_*massPoint1.mass_/(r**3+10)
+      ax = ax + g * (massPoint2.x_-massPoint1.x_)
+      ay = ay + g * (massPoint2.y_-massPoint1.y_)
+      az = az + g * (massPoint2.z_-massPoint1.z_)
     massPoint1.update(ax, ay, az,dt)
+  
   if (t%dt_per_frame==0):
       for massPoint in massPoints:
         massPoint.render()
