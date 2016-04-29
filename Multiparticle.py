@@ -1,15 +1,20 @@
-from Tkinter import *
 import random
 import math
+import pygame
+import pdb
+import numpy as np
 
-worldWidth = 500
-worldHeight = 500
+worldWidth = 900
+worldHeight = 900
+worldDepth = 3
 
-tk = Tk()
-canvas = Canvas(tk, width = worldWidth, height = worldHeight)
-tk.title("souvik's gravity simulator")
-canvas.pack()
-
+pygame.init()
+screen = pygame.display.set_mode((worldWidth,worldHeight))
+done = False
+clock=pygame.time.Clock()
+maxfps=60
+font = pygame.font.Font(None,30)
+dt=0.1
 class MassPoint:
   def __init__(self, mass, x, y, z, vx, vy, vz):
     self.mass_=mass
@@ -19,42 +24,40 @@ class MassPoint:
     self.vx_=vx
     self.vy_=vy
     self.vz_=vz
-    rad=mass**(1./3.)
-    self.shape=canvas.create_oval(self.x_-rad/2, self.y_-rad/2, self.x_+rad/2, self.y_+rad/2, fill="orange")
-    
-  def update1(self, ax, ay, az, dt):
-    self.vx_new=self.vx_+ax*dt
-    self.vy_new=self.vy_+ay*dt
-    self.vz_new=self.vz_+az*dt
-    self.x_new=self.x_+self.vx_*dt+0.5*ax*dt*dt
-    self.y_new=self.y_+self.vy_*dt+0.5*ay*dt*dt
-    self.z_new=self.z_+self.vz_*dt+0.5*az*dt*dt
-    if (self.x_new<0 or self.x_new>worldWidth):
-      self.vx_new=-self.vx_new;
-    if (self.y_new<0 or self.y_new>worldHeight):
-      self.vy_new=-self.vy_new;
-    
-  def update2(self):
-    canvas.move(self.shape, self.x_new-self.x_, self.y_new-self.y_)
-    self.vx_=self.vx_new
-    self.vy_=self.vy_new
-    self.vz_=self.vz_new
-    self.x_=self.x_new
-    self.y_=self.y_new
-    self.z_=self.z_new
-    
+    self.rad=mass**(1./3.)
+    self.color = (255,255,255)
+    self.colorwarp = (0,0,0)
+  def update(self, ax, ay, az, dt):
+    self.vx=self.vx_+ax*dt
+    self.vy=self.vy_+ay*dt
+    self.vz=self.vz_+az*dt
+    self.x_=self.x_+self.vx_*dt+0.5*ax*dt*dt
+    self.y_=self.y_+self.vy_*dt+0.5*ay*dt*dt
+    self.z_=self.z_+self.vz_*dt+0.5*az*dt*dt
+    # we're on a torus
+    if (self.x_<0):
+        self.x_ += worldWidth
+    if (self.x_>worldWidth):
+        self.x_ -= worldWidth
+    if (self.y_<0) :
+        self.y_ += worldHeight
+    if (self.y_>worldHeight) :
+        self.y_ -= worldHeight
+    self.rad=self.mass_**(1./3.)*(self.z_/100+1)**(2* np.sign(self.z_))
+    if self.vz_>0:
+        self.colorwarp = self.vz_
+    else:
+        self.colorwarp = (0,10,10)*z
   def render(self):
-    canvas.coords(self.x_, self.y_)
-    
-massPoints = []
-for i in range(10):
-  massPoints.append(MassPoint(1, random.randrange(worldWidth*0.3, worldWidth*0.7), random.randrange(worldHeight*0.3, worldHeight*0.7), 0, random.randrange(-10, 10), random.randrange(-10, 10), random.randrange(-5, 5)))
+    pygame.draw.circle(screen,self.color,(int(self.x_),int(self.y_)),int(self.rad),0)
 
-#massPoints.append(MassPoint(1000, worldWidth*0.5, worldHeight*0.5, 0, 0, 0, 0))
-#massPoints.append(MassPoint(10, 500, 350, 0, 0, 7, 0))
+massPoints = []
+for i in range(20):
+  massPoints.append(MassPoint(100, random.uniform(worldWidth*0.3, worldWidth*0.7), random.uniform(worldHeight*0.3, worldHeight*0.7), 0, random.uniform(-5, 5), random.uniform(-5, 5), random.uniform(-0.1, 0.1)))
 
 t=0
-while True:
+while not done:
+  screen.fill((0,0,0))
   t=t+1
   for massPoint1 in massPoints:
     ax = 0
@@ -68,13 +71,10 @@ while True:
           ax = ax + g * (massPoint2.x_-massPoint1.x_)
           ay = ay + g * (massPoint2.y_-massPoint1.y_)
           az = az + g * (massPoint2.z_-massPoint1.z_)
-    massPoint1.update1(ax, ay, az, 0.01)
-    
-  for massPoint in massPoints:  
-    massPoint.update2()
-    
-  if (t%1==0):
-    for massPoint in massPoints:
-      massPoint.render()
-    tk.update()
-
+    massPoint1.update(ax, ay, az,dt)
+  for massPoint in massPoints:
+    massPoint.render()
+  text = font.render("t = %6.4f"%t, True, (255,255,255))
+  screen.blit(text,(20,20))
+  pygame.display.flip()
+  clock.tick(maxfps)
